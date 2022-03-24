@@ -1,0 +1,293 @@
+---
+title: '*Les 10 plus importants fleuves du Monde*'
+author: "Cindy Da Cruz Porfirio"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,message=FALSE,warning=FALSE)
+```
+
+```{r}
+library(rstatix)
+library(kableExtra)
+library(tinytex)
+```
+
+## *I. Introduction : qu'est ce qu'un fleuve*
+
+Afin de répondre à la question suivante: quels sont les 10 plus importants fleuves du Monde, il nous pourrait nécessaire de définir ce qu'est un fleuve dans un premier temps puis sur quelles variables nous nous reposerons pour effectuer notre rang.
+
+"Du latin fluvius. C'est au XVIIIe siècle qu'il a convenu d'appeler fleuve les cours d'eau qui se jettent dans la mer, le terme de rivière étant réserver à leurs affluents. On pourrait penser que le tracé de nombre de frontières suit les cours de grands fleuves. Évidemment, les Français pensent au Rhin qui marque sur une partie de son cours la frontière entre la France et l'Allemagne. En terme de géohistoire, il ne correspond pourtant pas à la limite entre l'aire de la langue française et celle des parlers germaniques qui passe plus à l'ouest. Il y a aussi le cours du Rio Grande qui marque une grande partie de la frontière entre les États-Unis et le Mexique. En fait, les lignes de partage des eaux, surtout les lignes de crêtes dans les montagnes, ont servi bien davantage à marquer les frontières entre les États."
+
+(Lacoste, Y. (2003).De la géopolitique aux paysages: dictionnaire de la géographie. Armand Colin.)
+
+## *II. Collecte des données*
+
+```{r}
+dfF<- read.csv(file ="DATA/Fleuves_français.csv",
+                  header = TRUE,sep = ";")
+```
+
+```{r}
+dfP<- read.csv(file ="DATA/Fleuves_portugais.csv",sep = ";")
+```
+
+```{r}
+
+#### Renomme les colonnes de la base en français
+
+colnames(dfF) <- c("Rang,'Cours d'eau", "Longueur", "Bassin versant", "Module du débit", "Villes traversées","Embouchure", "Continent","Pays dans le bassin versant")
+
+names(dfF)<-c("Rang", "Cours d'eau", "Longueur", "Bassin versant", "Module du débit", "Villes traversées","Embouchure", "Continent","Pays dans le bassin versant")
+```
+
+```{r}
+colnames(dfP) <- c("Rang,'Rio", "Extensão", "Área drenada", "Vazão média", "Escoadouro/Foz","Países da bacia hidrográfica") # Renomme les colonnes de la base en portugais 
+
+names(dfP)<-c("Rang","Rio", "Extensão", "Área drenada", "Vazão média", "Escoadouro/Foz","Países da bacia hidrográfica") # Renomme les colonnes de la base en français
+
+```
+
+```{r}
+ # regarde le type de chaque variable avec la commande str
+
+
+dfF$Rang<-as.factor(dfF$Rang) # change en facteur, écrase l'ancienne variable
+dfF$Longueur<- as.numeric(dfF$Longueur)
+dfF$`Bassin versant`<-as.numeric(dfF$`Bassin versant`)
+dfF$`Module du débit`<-as.numeric(dfF$`Module du débit`)
+dfP$Rang<-as.factor(dfP$Rang)
+
+dfP$Rang<-as.factor(dfP$Rang)
+dfP$Extensão<-as.numeric(dfP$Extensão)
+dfP$`Área drenada`<-as.numeric(dfP$`Área drenada`)
+dfP$`Vazão média`<-as.numeric(dfP$`Vazão média`)
+
+# on revérifie le type 
+
+```
+
+Pour répondre à notre question, nous avons importer des données provenant du site Wikipédia. Ces données accessibles à tous et gratuites en ligne correspondent à des "open data". Ces raisons nous ont poussé à choisir ce site. Afin de comparer nos données et les différents rangs attribués aux fleuves, nous avons sélectionner deux sources: une page wikipédia en français et en portugais.
+
+<https://pt.wikipedia.org/wiki/Lista_dos_rios_mais_extensos_do_mundo>
+
+<https://fr.wikipedia.org/wiki/Liste_des_plus_longs_cours_d%27eau>
+
+<br><br>
+
+PS: Nous avons procéder à un nettoyage des données avant d'importer les données sur R. Cette étape a permis de supprimer les caractères spéciaux (comme les astérix ou les points) qui ne servaient pas de séparateur.
+
+Le fait de collecter des données de différentes sources sur un même sujet, nous permet de comparer la stabilité des résultats. Nous rappelons que les données sont au croisement des fleuves (ligne) et des variables (colonnes). Tout d'abord, nous observons que le nombre de colonnes n'est pas le même. Si on trouve 9 variables pour le site français , il n'y en a que 7 sur le site portugais. Il semble à première vue que les données sont différentes pour les deux sources.
+
+<br><br>
+
+C'est notamment le cas à la fois pour les variables quantitatives comme la longueur (km), le bassin versant (km2) et le module du début (m3/s) et pour les variables qualitatives : fleuves, pays dans le bassin versant et embouchure. Par exemple, pour la longueur du Nil, le site français note 6 853 km alors qu'en portugais, il y a écrit 6 650 km. Par ailleurs, nous ne trouvons pas exactement les mêmes pays dans le bassin versant ni pour les embouchures dans les deux sources. Sur le site français, nous trouvons pour l'Amzone comme pays dans le bassin versant : le Brésil, le Pérou , la Colombie, le Venezuela, l'Equateur et la Bolivie. Tandis que sur le site portugais, on y ajoute aussi la Guyane. Par conséquent, ces différences conduisent à deux rangs non identiques. Nous retrouvons au premier rang le Nil sur le site portugais alors que sur l'autre site en français c'est l'Amazone.
+
+<br>
+
+Compte tenu des difficultés de mesure de la longueur des fleuves, ces données restent des approximations. Par exemple, l'échelle de la carte utilisée influence sur la perception que l'on a de la longueur du fleuve.
+
+<br>
+
+Le débat sur la détermination du plus grand fleuve du Monde est toujours d'actualité. Il peut être légitime de se demander sur quelle variable, le site se repose afin de déterminer le rang. Si la longueur est la principale variable permettant de classer les fleuves pour les deux sites, les données caractérisant les fleuves ne sont pas les mêmes.
+
+<br>
+
+## *III. Quels sont les 10 plus grands fleuves du Monde en matière de longueur?*
+
+<br><br>
+
+### Tableau des 10 plus grands fleuves en matière de longueur
+
+<br>
+
+#### Tableau (source française)
+
+Si l'on prend la longueur comme variable traduisant la grandeur d'un fleuve et les 10 premiers qui en découlent, nous trouvons le tableau suivant: <br>
+
+```{r tableau pour le site français}
+dfF_F10<-dfF[,c("Cours d'eau","Longueur")]
+tableF<-head(dfF_F10,10)
+kableF<-kable(tableF)
+kableF
+
+```
+
+<br>
+
+Pour le site français, le plus grand fleuve du Monde en matière de longueur est l'Amazone.A présent, regardons le deuxième classement donné par le site Wikipédia en portugais.
+
+<br><br>
+
+#### Tableau (source portugaise)
+
+```{r}
+dfP_P10<-dfP[,c("Rio","Extensão")]
+
+tableP<-head(dfP_P10,10)
+kableP<-kable(tableP)
+kableP
+```
+
+<br><br>
+
+Contraiment au site en français, le plus grand fleuve du Monde en matière de longueur est le Nil. Même si nous utilisons la même variable (à savoir la longueur) pour déterminer le plus grand fleuve, les deux sources nous proposent une réponse différente.
+
+### Les paramètres statistiques principaux
+
+<br><br>
+
+Nous pouvons dans un second temps faire une première exploration statistique sur les fleuves.
+
+<br><br>
+
+#### a) Wikipédia français
+
+```{r}
+statF <-get_summary_stats(tableF, show = c("mean","min", "max"))
+kable(statF, digits = 0) %>% kable_classic_2() %>% kable_styling(font_size = 15,)
+
+```
+
+Notre tableau montre la distribution de la variable longueur (minimum,maximum,moyenne) pour le classement en français. Le nombre d'observations est égal à 10, puisque nous avons sélectionné les dix premiers fleuves. Le plus petit fleuve en terme de longueur est de 4 400 km. Tandis que le plus grand fleuve toujours en terme de longueur est de 6992 km. La moyenne des 10 premiers fleuves est de 5 646 km. <br><br>
+
+#### b) Wikipédia portugais
+
+```{r}
+statP <-get_summary_stats(tableP, show = c("mean","min", "max"))
+kable(statP, digits = 0) %>% kable_classic_2() %>% kable_styling(font_size = 15,)
+```
+
+Notre tableau montre la distribution de la variable longueur (minimum,maximum,moyenne) pour le classement en portugais. Le plus petit fleuve en terme de longueur est de 4 269 km (comme pour le premier classement). Tandis que le plus grand fleuve toujours en terme de longueur est de 6 650 km. La moyenne des 10 premiers fleuves est de 5 402 km.
+
+### Photos du plus grand fleuve du Monde en fonction des deux sources
+
+#### Photo de l'Amazone <br>
+
+<br><br>
+
+Voici une image du plus grand fleuve du Monde selon la source française: <br>
+
+<br><br>
+
+![](Image/Amazone.jpg)
+
+#### Photo du Nil
+
+<br><br>
+
+Voici une image du plus grand fleuve du Monde selon la source portugaise:
+
+<br><br>
+
+![](Image/Nil.jpg)
+
+<br><br>
+
+## *IV. Autre critère de classement (Bassin versant km2)*
+
+Selon Roger Brunet , géographe français le bassin versant est "une désignation technique et précise de tout partie d'un bassin hydrographique: c'est tout l'étendue qui est en amont d'une station de mesure et dont les eaux "versent" en ce point."
+
+<br>
+
+(Brunet, R. (1997). Les mots de la géographie: Tourisme et loisirs. L'Espace géographique, 26(3), 204-204.)
+
+### Tableau des 10 plus grands fleuves en matière de bassin versant
+
+#### Tableau (site français)
+
+<br>
+
+Si l'on prend le bassin versant comme variable traduisant la grandeur d'un fleuve et que nous gardons les dix premiers, nous trouvons le tableau suivant: <br>
+
+```{r}
+dfF_BS10<-dfF[,c("Cours d'eau","Bassin versant")]
+tableBSF<-head(dfF_BS10,10)
+
+kableBSF<-kable(tableBSF)
+kableBSF
+```
+
+<br><br>
+
+Selon la source française, lorsque nous sélectionnons la variable bassin versant, le classement ne change pas. En effet, il paraît logique que le classement du plus grand fleuve reste le même à la fois lorsqu'on nous prenons comme critère la longueur ou le bassin versant.
+
+<br><br>
+
+#### Tableau (site portugais)
+
+```{r}
+dfP_BS10<-dfP[,c("Rio","Área drenada")]
+
+tableBSP<-head(dfP_BS10,10)
+
+kableBSP<-kable(tableBSP)
+kableBSP
+```
+
+<br> 
+Selon la source wikipédia en portugais, lorsque nous sélectionnons la variable bassin versant , le classement ne change pas nons plus. Autrement dit, le Nil reste le plus grand fleuve si l'on considère ce critère de grandeur.
+
+<br><br>
+
+### Les paramètres statistiques principaux
+
+#### a) Wikipédia français
+
+<br>
+
+```{r}
+statF2 <-get_summary_stats(tableBSF, show = c("mean","min", "max"))
+kable(statF2, digits = 2) %>% kable_classic_2() %>% kable_styling(font_size = 15,)
+```
+
+<br> Notre tableau montre la distribution de la variable bassin versant (en km2). Le plus petit fleuve (lorsque l'on considère comme critère le bassin versant) est de 752 443 km2. Tandis que le plus grand fleuve toujours est de 6 112 000 km2. La moyenne des 10 premiers fleuves est de 2 899 740 km2.
+
+<br><br>
+
+#### b) Wikipédia portugais
+
+<br>
+
+```{r}
+statP2 <-get_summary_stats(tableBSP, show = c("mean","min", "max"))
+kable(statP2, digits = 2) %>% kable_classic_2() %>% kable_styling(font_size = 15,)
+```
+
+<br><br>
+
+Le plus petit fleuve est de 745 000 km2. Tandis que le plus grand fleuve toujours est de 6 915 000 km2. La moyenne des 10 premiers fleuves est de 2990400 km2.
+
+<br>
+
+Nous observons comme pour le classement en matière de longueur, un rang différent entre les deux sources lorsque l'on considère comme critère le bassin versant. En effet, plus le fleuve sera long, plus le bassin versant le sera aussi. Les deux variables à priori corrélées donnent ainsi le même classement.
+
+<br><br>
+
+## *V. Conclusion : existe-t-il une réponse unique à la question ?*
+
+<br><br>
+
+Ce travail nous amène à prendre avec précaution les classements que nous observons en général. Premièrement, les mesures de longueur des fleuves ne sont que des approximations. A partir de cela, les données entre les différentes sources sont différentes. Selon le site wikipédia en français, l'Amazone est le plus grand fleuve. Tandis que pour le site wikipédia en portugais, le plus grand fleuve est le Nil. En plus des données divergentes, il faut se demander sur quel critère se base le classement. Nous observons plusieurs variables telles que le bassin versant ou le module du débit. C'est pourquoi, nous avons effectué un classement selon un autre critère: le bassin versant (km2). Nous avons retrouvé le même classement que précédemmment (pour le site en français: l'Amazone et pour le site portugais: le Nil). Il serait intéressant de se demander si le classement serait le même pour une autre variable comme le module du débit (m3/s). Si nous devions faire un choix entre les deux, nous dirions le Nil car sur les deux sites celui-ci est le plus grand à la fois pour la variable du bassin versant et pour le module du débit. Nous laissons les chercheurs trancher la question.
+
+<br><br>
+
+## *Sources*
+
+<br><br>
+
+-   Adrian. « Quel est le fleuve le plus long du monde ? » La culture générale, 22 juillet 2018, <https://www.laculturegenerale.com/fleuve-plus-long-monde/>.
+
+-   « Amazone fleuve longueurs » Vacances - Guide Voyage ». Vacances - Guide Voyage, <https://evasion-online.com/tag/amazone-fleuve-longueurs>.
+
+-   Brunet, R. (1997). Les mots de la géographie: Tourisme et loisirs. L'Espace géographique, 26(3), 204-204.
+
+-   Lacoste, Y. (2003).De la géopolitique aux paysages: dictionnaire de la géographie. Armand Colin.
+
+-   « Lista dos rios mais extensos do mundo ». Wikipédia, a enciclopédia livre, 17 novembre 2021. Wikipedia, <https://pt.wikipedia.org/w/index.php?title=Lista_dos_rios_mais_extensos_do_mundo&oldid=62439228>.
+
+-   « Liste des plus longs cours d'eau ». Wikipédia, 27 décembre 2021. Wikipedia, <https://fr.wikipedia.org/w/index.php?title=Liste_des_plus_longs_cours_d%27eau&oldid=189274352>.
